@@ -3,3 +3,4 @@ Flask-SQLAlchemy==3.0.5
 twilio==8.10.0
 gunicorn==21.2.0
 python-dotenv==1.0.0
+# schedule removed - using built-in threading instead
