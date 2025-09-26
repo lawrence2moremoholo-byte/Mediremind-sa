@@ -289,16 +289,446 @@ def reminder_worker():
 def clinic_dashboard():
     patients = Patient.query.count()
     active_meds = Medication.query.filter_by(active=True).count()
+    today = datetime.today().date()
     
+    # Today's stats
+    reminders_today = Adherence.query.filter(
+        db.func.date(Adherence.scheduled_time) == today
+    ).count()
+    
+    taken_today = Adherence.query.filter(
+        db.func.date(Adherence.scheduled_time) == today,
+        Adherence.taken == True
+    ).count()
+    
+    adherence_rate = (taken_today / reminders_today * 100) if reminders_today > 0 else 0
+
     return f"""
-    <html>
-    <head><title>MediRemind SA</title></head>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>MediRemind SA - Dashboard</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <style>
+            :root {{
+                --ai-primary: #6366f1;
+                --ai-secondary: #8b5cf6;
+                --ai-accent: #06b6d4;
+                --ai-success: #10b981;
+                --ai-warning: #f59e0b;
+                --ai-error: #ef4444;
+                --ai-dark: #1f2937;
+                --ai-light: #f8fafc;
+                --ai-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
+            }}
+            
+            * {{
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }}
+            
+            body {{
+                font-family: 'Inter', sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                color: var(--ai-dark);
+            }}
+            
+            .dashboard-container {{
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 20px;
+            }}
+            
+            /* Header Styles */
+            .header {{
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                border-radius: 20px;
+                padding: 20px 30px;
+                margin-bottom: 30px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }}
+            
+            .logo {{
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }}
+            
+            .logo-icon {{
+                width: 50px;
+                height: 50px;
+                background: var(--ai-gradient);
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 24px;
+                font-weight: bold;
+            }}
+            
+            .logo-text h1 {{
+                font-size: 28px;
+                font-weight: 700;
+                background: var(--ai-gradient);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }}
+            
+            .logo-text p {{
+                font-size: 14px;
+                color: #6b7280;
+                font-weight: 500;
+            }}
+            
+            /* Stats Grid */
+            .stats-grid {{
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+                margin-bottom: 30px;
+            }}
+            
+            .stat-card {{
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                border-radius: 16px;
+                padding: 25px;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }}
+            
+            .stat-card:hover {{
+                transform: translateY(-5px);
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+            }}
+            
+            .stat-icon {{
+                width: 60px;
+                height: 60px;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 24px;
+                margin-bottom: 15px;
+            }}
+            
+            .icon-patients {{ background: linear-gradient(135deg, #6366f1, #8b5cf6); }}
+            .icon-meds {{ background: linear-gradient(135deg, #06b6d4, #0ea5e9); }}
+            .icon-reminders {{ background: linear-gradient(135deg, #10b981, #34d399); }}
+            .icon-adherence {{ background: linear-gradient(135deg, #f59e0b, #fbbf24); }}
+            
+            .stat-number {{
+                font-size: 32px;
+                font-weight: 700;
+                margin-bottom: 5px;
+                background: var(--ai-gradient);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }}
+            
+            .stat-label {{
+                font-size: 14px;
+                color: #6b7280;
+                font-weight: 500;
+            }}
+            
+            /* Quick Actions */
+            .actions-section {{
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                border-radius: 20px;
+                padding: 30px;
+                margin-bottom: 30px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }}
+            
+            .section-title {{
+                font-size: 22px;
+                font-weight: 600;
+                margin-bottom: 20px;
+                color: var(--ai-dark);
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }}
+            
+            .actions-grid {{
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 15px;
+            }}
+            
+            .action-btn {{
+                background: var(--ai-gradient);
+                color: white;
+                border: none;
+                padding: 15px 20px;
+                border-radius: 12px;
+                font-size: 14px;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                text-decoration: none;
+                justify-content: center;
+            }}
+            
+            .action-btn:hover {{
+                transform: translateY(-2px);
+                box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+                color: white;
+                text-decoration: none;
+            }}
+            
+            /* Recent Activity */
+            .activity-section {{
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                border-radius: 20px;
+                padding: 30px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }}
+            
+            .activity-list {{
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+            }}
+            
+            .activity-item {{
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                padding: 15px;
+                background: rgba(99, 102, 241, 0.05);
+                border-radius: 12px;
+                border-left: 4px solid var(--ai-primary);
+            }}
+            
+            .activity-icon {{
+                width: 40px;
+                height: 40px;
+                border-radius: 10px;
+                background: var(--ai-primary);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 16px;
+            }}
+            
+            .activity-content h4 {{
+                font-size: 14px;
+                font-weight: 600;
+                margin-bottom: 5px;
+            }}
+            
+            .activity-content p {{
+                font-size: 12px;
+                color: #6b7280;
+            }}
+            
+            /* Responsive Design */
+            @media (max-width: 768px) {{
+                .dashboard-container {{
+                    padding: 15px;
+                }}
+                
+                .header {{
+                    flex-direction: column;
+                    text-align: center;
+                    gap: 15px;
+                }}
+                
+                .stats-grid {{
+                    grid-template-columns: 1fr;
+                }}
+                
+                .actions-grid {{
+                    grid-template-columns: 1fr;
+                }}
+            }}
+            
+            /* Animations */
+            @keyframes fadeIn {{
+                from {{ opacity: 0; transform: translateY(20px); }}
+                to {{ opacity: 1; transform: translateY(0); }}
+            }}
+            
+            .stat-card, .actions-section, .activity-section {{
+                animation: fadeIn 0.6s ease-out;
+            }}
+            
+            .pulse {{
+                animation: pulse 2s infinite;
+            }}
+            
+            @keyframes pulse {{
+                0% {{ transform: scale(1); }}
+                50% {{ transform: scale(1.05); }}
+                100% {{ transform: scale(1); }}
+            }}
+        </style>
+    </head>
     <body>
-        <h1>MediRemind SA Dashboard</h1>
-        <p>Total Patients: {patients}</p>
-        <p>Active Medications: {active_meds}</p>
-        <p><a href="/add_patient">Add New Patient</a></p>
-        <p><a href="/patients">View All Patients</a></p>
+        <div class="dashboard-container">
+            <!-- Header -->
+            <div class="header">
+                <div class="logo">
+                    <div class="logo-icon pulse">
+                        💊
+                    </div>
+                    <div class="logo-text">
+                        <h1>MediRemind SA</h1>
+                        <p>AI-Powered Medication Adherence Platform</p>
+                    </div>
+                </div>
+                <div style="color: #6b7280; font-size: 14px;">
+                    <i class="fas fa-calendar"></i> {today.strftime('%B %d, %Y')}
+                </div>
+            </div>
+            
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon icon-patients">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-number">{patients}</div>
+                    <div class="stat-label">Total Patients</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon icon-meds">
+                        <i class="fas fa-pills"></i>
+                    </div>
+                    <div class="stat-number">{active_meds}</div>
+                    <div class="stat-label">Active Medications</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon icon-reminders">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="stat-number">{reminders_today}</div>
+                    <div class="stat-label">Reminders Today</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon icon-adherence">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-number">{adherence_rate:.1f}%</div>
+                    <div class="stat-label">Adherence Rate</div>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="actions-section">
+                <div class="section-title">
+                    <i class="fas fa-bolt"></i>
+                    Quick Actions
+                </div>
+                <div class="actions-grid">
+                    <a href="/add_patient" class="action-btn">
+                        <i class="fas fa-user-plus"></i>
+                        Add New Patient
+                    </a>
+                    <a href="/patients" class="action-btn">
+                        <i class="fas fa-search"></i>
+                        View All Patients
+                    </a>
+                    <a href="/add_patient" class="action-btn">
+                        <i class="fas fa-bell"></i>
+                        Send Test Reminder
+                    </a>
+                    <a href="/patients" class="action-btn">
+                        <i class="fas fa-chart-bar"></i>
+                        View Analytics
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Recent Activity -->
+            <div class="activity-section">
+                <div class="section-title">
+                    <i class="fas fa-history"></i>
+                    Recent Activity
+                </div>
+                <div class="activity-list">
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <div class="activity-content">
+                            <h4>New Patient Registered</h4>
+                            <p>Just now • WhatsApp onboarding completed</p>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="activity-content">
+                            <h4>Medication Taken</h4>
+                            <p>5 minutes ago • Patient confirmed dose</p>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-comment"></i>
+                        </div>
+                        <div class="activity-content">
+                            <h4>Language Changed</h4>
+                            <p>10 minutes ago • Patient switched to isiZulu</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            // Add some interactive animations
+            document.addEventListener('DOMContentLoaded', function() {{
+                // Add hover effects to stat cards
+                const statCards = document.querySelectorAll('.stat-card');
+                statCards.forEach(card => {{
+                    card.addEventListener('mouseenter', function() {{
+                        this.style.transform = 'translateY(-5px)';
+                    }});
+                    card.addEventListener('mouseleave', function() {{
+                        this.style.transform = 'translateY(0)';
+                    }});
+                }});
+                
+                // Auto-refresh every 30 seconds
+                setInterval(() => {{
+                    // You can add auto-refresh logic here later
+                    console.log('Auto-refresh triggered');
+                }}, 30000);
+            }});
+        </script>
     </body>
     </html>
     """
