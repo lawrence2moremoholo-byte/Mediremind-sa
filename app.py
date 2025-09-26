@@ -3,7 +3,6 @@ import json
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
-from twilio.rest import Client
 import threading
 import time
 
@@ -14,9 +13,22 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# Twilio setup
-twilio_client = Client(os.getenv('TWILIO_SID'), os.getenv('TWILIO_TOKEN'))
+# Twilio setup with proper error handling
+twilio_sid = os.getenv('TWILIO_SID')
+twilio_token = os.getenv('TWILIO_TOKEN')
 twilio_number = os.getenv('TWILIO_WHATSAPP')
+
+if not twilio_sid or not twilio_token:
+    raise Exception("❌ Twilio credentials missing! Please set TWILIO_SID and TWILIO_TOKEN environment variables in Render dashboard.")
+
+try:
+    from twilio.rest import Client
+    twilio_client = Client(twilio_sid, twilio_token)
+    print("✅ Twilio client initialized successfully")
+except Exception as e:
+    raise Exception(f"❌ Twilio initialization failed: {e}")
+
+# ... REST OF YOUR CODE STAYS THE SAME ...
 
 # MODELS
 class Patient(db.Model):
