@@ -362,12 +362,43 @@ def add_patient():
     </form>
     """
 
-# Start scheduler
-scheduler_thread = threading.Thread(target=send_scheduled_reminders)
-scheduler_thread.daemon = True
-scheduler_thread.start()
+# SIMPLIFIED SCHEDULER - REPLACE EVERYTHING AFTER YOUR ROUTES
 
-if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-    app.run(host='0.0.0.0', port=5000)
+def reminder_worker():
+    """Background thread that checks for reminders every minute"""
+    while True:
+        try:
+            current_time = datetime.now().strftime('%H:%M')
+            
+            # Find active medications due now
+            due_meds = Medication.query.filter_by(active=True).all()
+            
+            for med in due_meds:
+                if med.times and current_time in med.times:
+                    patient = Patient.query.filter_by(phone=med.patient_phone).first()
+                    if patient:
+                        message = MESSAGES[patient.language]['reminder'].format(
+                            medication=med.name, dosage=med.dosage
+                        )
+                        if send_whatsapp(patient.phone, message):
+                            # Log successful reminder
+                            log = Adherence(
+                                patient_phone=patient.phone,
+                                medication=med.name,
+                                scheduled_time=datetime.now()
+                            )
+                            db.session.add(log)
+                            db.session.commit()
+            
+            time.sleep(60)  # Wait 60 seconds
+            
+        except Exception as e:
+            print(f"Reminder worker error: {e}")
+            time.sleep(60)
+
+# Start the background thread when app loads
+@app.before_first_request
+def start_reminder_worker():
+    worker_thread = threading.Thread(target=reminder_worker, daemon=True)
+    worker_thread.start()
+    print("Reminder worker started!")
