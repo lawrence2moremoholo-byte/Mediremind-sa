@@ -97,9 +97,567 @@ def send_whatsapp(to_number, message):
 
 @app.route('/')
 def clinic_dashboard():
-    """Modern main dashboard"""
+    """Modern main dashboard with medical media rotation"""
     stats = get_dashboard_stats()
-    return render_dashboard_template('dashboard', stats=stats)
+    
+    # Medical media rotation - add your own images/videos here
+    medical_media = [
+        {"type": "image", "url": "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=250&fit=crop", "title": "Patient Care", "description": "24/7 medication support"},
+        {"type": "image", "url": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400&h=250&fit=crop", "title": "Health Monitoring", "description": "Real-time adherence tracking"},
+        {"type": "image", "url": "https://images.unsplash.com/photo-1584467735871-8db9ac8e5e3a?w=400&h=250&fit=crop", "title": "Multilingual Support", "description": "11 official languages"},
+        {"type": "video", "url": "#", "title": "How It Works", "description": "Watch our introduction video", "placeholder": "🎥 Video Coming Soon"}
+    ]
+    
+    return f"""
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>MediRemind SA - Dashboard</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <style>
+            :root {{
+                --ai-primary: #6366f1;
+                --ai-secondary: #8b5cf6;
+                --ai-accent: #06b6d4;
+                --ai-success: #10b981;
+                --ai-warning: #f59e0b;
+                --ai-error: #ef4444;
+                --ai-dark: #1f2937;
+                --ai-light: #f8fafc;
+                --ai-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
+            }}
+            
+            * {{
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }}
+            
+            body {{
+                font-family: 'Inter', sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                color: var(--ai-dark);
+            }}
+            
+            .dashboard-container {{
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 20px;
+            }}
+            
+            /* Header Styles */
+            .header {{
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                border-radius: 20px;
+                padding: 20px 30px;
+                margin-bottom: 30px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }}
+            
+            .logo {{
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                cursor: pointer;
+                text-decoration: none;
+                color: inherit;
+            }}
+            
+            .logo:hover {{
+                text-decoration: none;
+                color: inherit;
+            }}
+            
+            .logo-icon {{
+                width: 50px;
+                height: 50px;
+                background: var(--ai-gradient);
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 24px;
+                font-weight: bold;
+            }}
+            
+            .logo-text h1 {{
+                font-size: 28px;
+                font-weight: 700;
+                background: var(--ai-gradient);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }}
+            
+            .logo-text p {{
+                font-size: 14px;
+                color: #6b7280;
+                font-weight: 500;
+            }}
+            
+            /* Navigation Tabs */
+            .nav-tabs {{
+                display: flex;
+                gap: 5px;
+                background: rgba(255, 255, 255, 0.1);
+                padding: 5px;
+                border-radius: 12px;
+                backdrop-filter: blur(10px);
+            }}
+            
+            .nav-tab {{
+                padding: 10px 20px;
+                border-radius: 8px;
+                text-decoration: none;
+                color: #6b7280;
+                font-weight: 500;
+                transition: all 0.3s ease;
+                border: none;
+                background: transparent;
+                cursor: pointer;
+            }}
+            
+            .nav-tab.active {{
+                background: rgba(255, 255, 255, 0.9);
+                color: var(--ai-primary);
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }}
+            
+            .nav-tab:hover {{
+                background: rgba(255, 255, 255, 0.7);
+                color: var(--ai-primary);
+            }}
+            
+            /* Stats Grid */
+            .stats-grid {{
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+                margin-bottom: 30px;
+            }}
+            
+            .stat-card {{
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                border-radius: 16px;
+                padding: 25px;
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }}
+            
+            .stat-card:hover {{
+                transform: translateY(-5px);
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+            }}
+            
+            .stat-icon {{
+                width: 60px;
+                height: 60px;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 24px;
+                margin-bottom: 15px;
+            }}
+            
+            .icon-patients {{ background: linear-gradient(135deg, #6366f1, #8b5cf6); }}
+            .icon-meds {{ background: linear-gradient(135deg, #06b6d4, #0ea5e9); }}
+            .icon-reminders {{ background: linear-gradient(135deg, #10b981, #34d399); }}
+            .icon-adherence {{ background: linear-gradient(135deg, #f59e0b, #fbbf24); }}
+            
+            .stat-number {{
+                font-size: 32px;
+                font-weight: 700;
+                margin-bottom: 5px;
+                background: var(--ai-gradient);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }}
+            
+            .stat-label {{
+                font-size: 14px;
+                color: #6b7280;
+                font-weight: 500;
+            }}
+            
+            /* Medical Media Rotator */
+            .media-section {{
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                border-radius: 20px;
+                padding: 30px;
+                margin-bottom: 30px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }}
+            
+            .media-rotator {{
+                position: relative;
+                height: 300px;
+                border-radius: 15px;
+                overflow: hidden;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            }}
+            
+            .media-slide {{
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                opacity: 0;
+                transition: opacity 1s ease-in-out;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 40px;
+            }}
+            
+            .media-slide.active {{
+                opacity: 1;
+            }}
+            
+            .media-content {{
+                text-align: center;
+                color: white;
+            }}
+            
+            .media-image {{
+                max-width: 100%;
+                max-height: 200px;
+                border-radius: 10px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            }}
+            
+            .media-video-placeholder {{
+                width: 100%;
+                height: 200px;
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 48px;
+                backdrop-filter: blur(10px);
+            }}
+            
+            .media-title {{
+                font-size: 24px;
+                font-weight: 600;
+                margin: 15px 0 10px 0;
+            }}
+            
+            .media-description {{
+                font-size: 16px;
+                opacity: 0.9;
+            }}
+            
+            .media-controls {{
+                display: flex;
+                justify-content: center;
+                gap: 10px;
+                margin-top: 20px;
+            }}
+            
+            .media-dot {{
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.3);
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }}
+            
+            .media-dot.active {{
+                background: white;
+                transform: scale(1.2);
+            }}
+            
+            /* Quick Actions */
+            .actions-section {{
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                border-radius: 20px;
+                padding: 30px;
+                margin-bottom: 30px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }}
+            
+            .section-title {{
+                font-size: 22px;
+                font-weight: 600;
+                margin-bottom: 20px;
+                color: var(--ai-dark);
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }}
+            
+            .actions-grid {{
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 15px;
+            }}
+            
+            .action-btn {{
+                background: var(--ai-gradient);
+                color: white;
+                border: none;
+                padding: 15px 20px;
+                border-radius: 12px;
+                font-size: 14px;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                text-decoration: none;
+                justify-content: center;
+            }}
+            
+            .action-btn:hover {{
+                transform: translateY(-2px);
+                box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+                color: white;
+                text-decoration: none;
+            }}
+            
+            /* Responsive Design */
+            @media (max-width: 768px) {{
+                .dashboard-container {{
+                    padding: 15px;
+                }}
+                
+                .header {{
+                    flex-direction: column;
+                    text-align: center;
+                    gap: 15px;
+                }}
+                
+                .nav-tabs {{
+                    width: 100%;
+                    justify-content: center;
+                }}
+                
+                .stats-grid {{
+                    grid-template-columns: 1fr;
+                }}
+                
+                .actions-grid {{
+                    grid-template-columns: 1fr;
+                }}
+                
+                .media-rotator {{
+                    height: 250px;
+                }}
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="dashboard-container">
+            <!-- Header -->
+            <div class="header">
+                <a href="/" class="logo">
+                    <div class="logo-icon pulse">
+                        💊
+                    </div>
+                    <div class="logo-text">
+                        <h1>MediRemind SA</h1>
+                        <p>AI-Powered Medication Adherence Platform</p>
+                    </div>
+                </a>
+                
+                <!-- Navigation Tabs -->
+                <div class="nav-tabs">
+                    <a href="/analytics" class="nav-tab">
+                        <i class="fas fa-chart-bar"></i> Analytics
+                    </a>
+                    <a href="/reports" class="nav-tab">
+                        <i class="fas fa-file-alt"></i> Reports
+                    </a>
+                    <a href="/settings" class="nav-tab">
+                        <i class="fas fa-cog"></i> Settings
+                    </a>
+                    <a href="/support" class="nav-tab">
+                        <i class="fas fa-life-ring"></i> Support
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon icon-patients">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-number">{stats['patients']}</div>
+                    <div class="stat-label">Total Patients</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon icon-meds">
+                        <i class="fas fa-pills"></i>
+                    </div>
+                    <div class="stat-number">{stats['active_meds']}</div>
+                    <div class="stat-label">Active Medications</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon icon-reminders">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="stat-number">{stats['reminders_today']}</div>
+                    <div class="stat-label">Reminders Today</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon icon-adherence">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-number">{stats['adherence_rate']:.1f}%</div>
+                    <div class="stat-label">Adherence Rate</div>
+                </div>
+            </div>
+            
+            <!-- Medical Media Rotator -->
+            <div class="media-section">
+                <div class="section-title">
+                    <i class="fas fa-images"></i>
+                    Healthcare Excellence
+                </div>
+                <div class="media-rotator" id="mediaRotator">
+                    <!-- Slides will be populated by JavaScript -->
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="actions-section">
+                <div class="section-title">
+                    <i class="fas fa-bolt"></i>
+                    Quick Actions
+                </div>
+                <div class="actions-grid">
+                    <a href="/add_patient" class="action-btn">
+                        <i class="fas fa-user-plus"></i>
+                        Add New Patient
+                    </a>
+                    <a href="/patients" class="action-btn">
+                        <i class="fas fa-search"></i>
+                        View All Patients
+                    </a>
+                    <a href="/send-test-reminder" class="action-btn">
+                        <i class="fas fa-bell"></i>
+                        Test System
+                    </a>
+                    <a href="/analytics" class="action-btn">
+                        <i class="fas fa-chart-bar"></i>
+                        View Analytics
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            // Medical Media Rotation
+            const medicalMedia = {json.dumps(medical_media)};
+            let currentSlide = 0;
+            
+            function initMediaRotator() {{
+                const rotator = document.getElementById('mediaRotator');
+                const controls = document.createElement('div');
+                controls.className = 'media-controls';
+                
+                // Create slides
+                medicalMedia.forEach((media, index) => {{
+                    const slide = document.createElement('div');
+                    slide.className = `media-slide ${{index === 0 ? 'active' : ''}}`;
+                    
+                    if (media.type === 'image') {{
+                        slide.innerHTML = `
+                            <div class="media-content">
+                                <img src="${{media.url}}" alt="${{media.title}}" class="media-image">
+                                <div class="media-title">${{media.title}}</div>
+                                <div class="media-description">${{media.description}}</div>
+                            </div>
+                        `;
+                    }} else {{
+                        slide.innerHTML = `
+                            <div class="media-content">
+                                <div class="media-video-placeholder">
+                                    ${{media.placeholder}}
+                                </div>
+                                <div class="media-title">${{media.title}}</div>
+                                <div class="media-description">${{media.description}}</div>
+                            </div>
+                        `;
+                    }}
+                    
+                    rotator.insertBefore(slide, controls);
+                    
+                    // Create control dot
+                    const dot = document.createElement('div');
+                    dot.className = `media-dot ${{index === 0 ? 'active' : ''}}`;
+                    dot.addEventListener('click', () => showSlide(index));
+                    controls.appendChild(dot);
+                }});
+                
+                rotator.appendChild(controls);
+            }}
+            
+            function showSlide(index) {{
+                const slides = document.querySelectorAll('.media-slide');
+                const dots = document.querySelectorAll('.media-dot');
+                
+                slides.forEach(slide => slide.classList.remove('active'));
+                dots.forEach(dot => dot.classList.remove('active'));
+                
+                slides[index].classList.add('active');
+                dots[index].classList.add('active');
+                currentSlide = index;
+            }}
+            
+            function nextSlide() {{
+                currentSlide = (currentSlide + 1) % medicalMedia.length;
+                showSlide(currentSlide);
+            }}
+            
+            // Auto-rotate every 5 seconds
+            setInterval(nextSlide, 5000);
+            
+            // Initialize when page loads
+            document.addEventListener('DOMContentLoaded', function() {{
+                initMediaRotator();
+                
+                // Add hover effects to stat cards
+                const statCards = document.querySelectorAll('.stat-card');
+                statCards.forEach(card => {{
+                    card.addEventListener('mouseenter', function() {{
+                        this.style.transform = 'translateY(-5px)';
+                    }});
+                    card.addEventListener('mouseleave', function() {{
+                        this.style.transform = 'translateY(0)';
+                    }});
+                }});
+            }});
+        </script>
+    </body>
+    </html>
+    """
 
 @app.route('/analytics')
 def analytics_dashboard():
