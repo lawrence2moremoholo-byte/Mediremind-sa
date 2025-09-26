@@ -56,14 +56,14 @@ class Adherence(db.Model):
     taken = db.Column(db.Boolean, default=False)
     responded_at = db.Column(db.DateTime)
 
-# MESSAGES (simplified for example)
+# MESSAGES
 MESSAGES = {
     'english': {
         'welcome': "🏥 Welcome to MediRemind SA! Choose language: 1. English 2. isiZulu",
         'medication_ask': "💊 What medication are you taking?",
         'dosage_ask': "📏 What is your dosage?",
         'schedule_ask': "⏰ What times should we remind you?",
-        'confirmation': "✅ Setup Complete! Medication: {medication}",
+        'confirmation': "✅ Setup Complete!",
         'reminder': "💊 Time for your {medication} ({dosage})",
         'taken_confirmation': "✅ Thank you! Dose recorded.",
         'help': "🆘 Help: Reply TAKEN, CHANGE, LANGUAGE, STOP"
@@ -71,9 +71,9 @@ MESSAGES = {
     'zulu': {
         'welcome': "🏥 Sawubona! Khetha ulimi: 1. isiZulu 2. English",
         'medication_ask': "💊 Uthatha umuthi onjani?",
-        'confirmation': "✅ Kuhle! Umuthi: {medication}",
+        'confirmation': "✅ Kuhle!",
         'reminder': "💊 Isikhathi sokuthatha {medication}",
-        'taken_confirmation': "✅ Ngiyabonga! Isilinganiso sirekhodiwe."
+        'taken_confirmation': "✅ Ngiyabonga!"
     }
 }
 
@@ -93,612 +93,89 @@ def send_whatsapp(to_number, message):
         print(f"WhatsApp send failed: {e}")
         return False
 
-# === MODERN DASHBOARD ROUTES ===
+# === DASHBOARD ROUTES ===
 
 @app.route('/')
 def clinic_dashboard():
     """Modern main dashboard with medical media rotation"""
     stats = get_dashboard_stats()
     
-    # Medical media rotation - add your own images/videos here
+    # Stock medical media from Unsplash
     medical_media = [
-        {"type": "image", "url": "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=250&fit=crop", "title": "Patient Care", "description": "24/7 medication support"},
-        {"type": "image", "url": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400&h=250&fit=crop", "title": "Health Monitoring", "description": "Real-time adherence tracking"},
-        {"type": "image", "url": "https://images.unsplash.com/photo-1584467735871-8db9ac8e5e3a?w=400&h=250&fit=crop", "title": "Multilingual Support", "description": "11 official languages"},
-        {"type": "video", "url": "#", "title": "How It Works", "description": "Watch our introduction video", "placeholder": "🎥 Video Coming Soon"}
+        {
+            "type": "image", 
+            "url": "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=600&h=400&fit=crop",
+            "title": "Patient Care Excellence",
+            "description": "24/7 multilingual medication support"
+        },
+        {
+            "type": "image", 
+            "url": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=600&h=400&fit=crop",
+            "title": "Health Monitoring",
+            "description": "Real-time adherence tracking and analytics"
+        },
+        {
+            "type": "image", 
+            "url": "https://images.unsplash.com/photo-1584467735871-8db9ac8e5e3a?w=600&h=400&fit=crop",
+            "title": "Multilingual Support",
+            "description": "11 official South African languages"
+        },
+        {
+            "type": "image", 
+            "url": "https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=600&h=400&fit=crop",
+            "title": "AI-Powered Reminders",
+            "description": "Smart WhatsApp conversations"
+        }
     ]
     
-    return f"""
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>MediRemind SA - Dashboard</title>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-        <style>
-            :root {{
-                --ai-primary: #6366f1;
-                --ai-secondary: #8b5cf6;
-                --ai-accent: #06b6d4;
-                --ai-success: #10b981;
-                --ai-warning: #f59e0b;
-                --ai-error: #ef4444;
-                --ai-dark: #1f2937;
-                --ai-light: #f8fafc;
-                --ai-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
-            }}
-            
-            * {{
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-            }}
-            
-            body {{
-                font-family: 'Inter', sans-serif;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                min-height: 100vh;
-                color: var(--ai-dark);
-            }}
-            
-            .dashboard-container {{
-                max-width: 1200px;
-                margin: 0 auto;
-                padding: 20px;
-            }}
-            
-            /* Header Styles */
-            .header {{
-                background: rgba(255, 255, 255, 0.95);
-                backdrop-filter: blur(10px);
-                border-radius: 20px;
-                padding: 20px 30px;
-                margin-bottom: 30px;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                border: 1px solid rgba(255, 255, 255, 0.2);
-            }}
-            
-            .logo {{
-                display: flex;
-                align-items: center;
-                gap: 15px;
-                cursor: pointer;
-                text-decoration: none;
-                color: inherit;
-            }}
-            
-            .logo:hover {{
-                text-decoration: none;
-                color: inherit;
-            }}
-            
-            .logo-icon {{
-                width: 50px;
-                height: 50px;
-                background: var(--ai-gradient);
-                border-radius: 12px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: white;
-                font-size: 24px;
-                font-weight: bold;
-            }}
-            
-            .logo-text h1 {{
-                font-size: 28px;
-                font-weight: 700;
-                background: var(--ai-gradient);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
-            }}
-            
-            .logo-text p {{
-                font-size: 14px;
-                color: #6b7280;
-                font-weight: 500;
-            }}
-            
-            /* Navigation Tabs */
-            .nav-tabs {{
-                display: flex;
-                gap: 5px;
-                background: rgba(255, 255, 255, 0.1);
-                padding: 5px;
-                border-radius: 12px;
-                backdrop-filter: blur(10px);
-            }}
-            
-            .nav-tab {{
-                padding: 10px 20px;
-                border-radius: 8px;
-                text-decoration: none;
-                color: #6b7280;
-                font-weight: 500;
-                transition: all 0.3s ease;
-                border: none;
-                background: transparent;
-                cursor: pointer;
-            }}
-            
-            .nav-tab.active {{
-                background: rgba(255, 255, 255, 0.9);
-                color: var(--ai-primary);
-                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            }}
-            
-            .nav-tab:hover {{
-                background: rgba(255, 255, 255, 0.7);
-                color: var(--ai-primary);
-            }}
-            
-            /* Stats Grid */
-            .stats-grid {{
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-                gap: 20px;
-                margin-bottom: 30px;
-            }}
-            
-            .stat-card {{
-                background: rgba(255, 255, 255, 0.95);
-                backdrop-filter: blur(10px);
-                border-radius: 16px;
-                padding: 25px;
-                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-                border: 1px solid rgba(255, 255, 255, 0.2);
-                transition: transform 0.3s ease, box-shadow 0.3s ease;
-            }}
-            
-            .stat-card:hover {{
-                transform: translateY(-5px);
-                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-            }}
-            
-            .stat-icon {{
-                width: 60px;
-                height: 60px;
-                border-radius: 12px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 24px;
-                margin-bottom: 15px;
-            }}
-            
-            .icon-patients {{ background: linear-gradient(135deg, #6366f1, #8b5cf6); }}
-            .icon-meds {{ background: linear-gradient(135deg, #06b6d4, #0ea5e9); }}
-            .icon-reminders {{ background: linear-gradient(135deg, #10b981, #34d399); }}
-            .icon-adherence {{ background: linear-gradient(135deg, #f59e0b, #fbbf24); }}
-            
-            .stat-number {{
-                font-size: 32px;
-                font-weight: 700;
-                margin-bottom: 5px;
-                background: var(--ai-gradient);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
-            }}
-            
-            .stat-label {{
-                font-size: 14px;
-                color: #6b7280;
-                font-weight: 500;
-            }}
-            
-            /* Medical Media Rotator */
-            .media-section {{
-                background: rgba(255, 255, 255, 0.95);
-                backdrop-filter: blur(10px);
-                border-radius: 20px;
-                padding: 30px;
-                margin-bottom: 30px;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-                border: 1px solid rgba(255, 255, 255, 0.2);
-            }}
-            
-            .media-rotator {{
-                position: relative;
-                height: 300px;
-                border-radius: 15px;
-                overflow: hidden;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            }}
-            
-            .media-slide {{
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                opacity: 0;
-                transition: opacity 1s ease-in-out;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 40px;
-            }}
-            
-            .media-slide.active {{
-                opacity: 1;
-            }}
-            
-            .media-content {{
-                text-align: center;
-                color: white;
-            }}
-            
-            .media-image {{
-                max-width: 100%;
-                max-height: 200px;
-                border-radius: 10px;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            }}
-            
-            .media-video-placeholder {{
-                width: 100%;
-                height: 200px;
-                background: rgba(255, 255, 255, 0.2);
-                border-radius: 10px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 48px;
-                backdrop-filter: blur(10px);
-            }}
-            
-            .media-title {{
-                font-size: 24px;
-                font-weight: 600;
-                margin: 15px 0 10px 0;
-            }}
-            
-            .media-description {{
-                font-size: 16px;
-                opacity: 0.9;
-            }}
-            
-            .media-controls {{
-                display: flex;
-                justify-content: center;
-                gap: 10px;
-                margin-top: 20px;
-            }}
-            
-            .media-dot {{
-                width: 12px;
-                height: 12px;
-                border-radius: 50%;
-                background: rgba(255, 255, 255, 0.3);
-                cursor: pointer;
-                transition: all 0.3s ease;
-            }}
-            
-            .media-dot.active {{
-                background: white;
-                transform: scale(1.2);
-            }}
-            
-            /* Quick Actions */
-            .actions-section {{
-                background: rgba(255, 255, 255, 0.95);
-                backdrop-filter: blur(10px);
-                border-radius: 20px;
-                padding: 30px;
-                margin-bottom: 30px;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-                border: 1px solid rgba(255, 255, 255, 0.2);
-            }}
-            
-            .section-title {{
-                font-size: 22px;
-                font-weight: 600;
-                margin-bottom: 20px;
-                color: var(--ai-dark);
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            }}
-            
-            .actions-grid {{
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 15px;
-            }}
-            
-            .action-btn {{
-                background: var(--ai-gradient);
-                color: white;
-                border: none;
-                padding: 15px 20px;
-                border-radius: 12px;
-                font-size: 14px;
-                font-weight: 500;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                text-decoration: none;
-                justify-content: center;
-            }}
-            
-            .action-btn:hover {{
-                transform: translateY(-2px);
-                box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
-                color: white;
-                text-decoration: none;
-            }}
-            
-            /* Responsive Design */
-            @media (max-width: 768px) {{
-                .dashboard-container {{
-                    padding: 15px;
-                }}
-                
-                .header {{
-                    flex-direction: column;
-                    text-align: center;
-                    gap: 15px;
-                }}
-                
-                .nav-tabs {{
-                    width: 100%;
-                    justify-content: center;
-                }}
-                
-                .stats-grid {{
-                    grid-template-columns: 1fr;
-                }}
-                
-                .actions-grid {{
-                    grid-template-columns: 1fr;
-                }}
-                
-                .media-rotator {{
-                    height: 250px;
-                }}
-            }}
-        </style>
-    </head>
-    <body>
-        <div class="dashboard-container">
-            <!-- Header -->
-            <div class="header">
-                <a href="/" class="logo">
-                    <div class="logo-icon pulse">
-                        💊
-                    </div>
-                    <div class="logo-text">
-                        <h1>MediRemind SA</h1>
-                        <p>AI-Powered Medication Adherence Platform</p>
-                    </div>
-                </a>
-                
-                <!-- Navigation Tabs -->
-                <div class="nav-tabs">
-                    <a href="/analytics" class="nav-tab">
-                        <i class="fas fa-chart-bar"></i> Analytics
-                    </a>
-                    <a href="/reports" class="nav-tab">
-                        <i class="fas fa-file-alt"></i> Reports
-                    </a>
-                    <a href="/settings" class="nav-tab">
-                        <i class="fas fa-cog"></i> Settings
-                    </a>
-                    <a href="/support" class="nav-tab">
-                        <i class="fas fa-life-ring"></i> Support
-                    </a>
-                </div>
-            </div>
-            
-            <!-- Stats Grid -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon icon-patients">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="stat-number">{stats['patients']}</div>
-                    <div class="stat-label">Total Patients</div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon icon-meds">
-                        <i class="fas fa-pills"></i>
-                    </div>
-                    <div class="stat-number">{stats['active_meds']}</div>
-                    <div class="stat-label">Active Medications</div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon icon-reminders">
-                        <i class="fas fa-bell"></i>
-                    </div>
-                    <div class="stat-number">{stats['reminders_today']}</div>
-                    <div class="stat-label">Reminders Today</div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon icon-adherence">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <div class="stat-number">{stats['adherence_rate']:.1f}%</div>
-                    <div class="stat-label">Adherence Rate</div>
-                </div>
-            </div>
-            
-            <!-- Medical Media Rotator -->
-            <div class="media-section">
-                <div class="section-title">
-                    <i class="fas fa-images"></i>
-                    Healthcare Excellence
-                </div>
-                <div class="media-rotator" id="mediaRotator">
-                    <!-- Slides will be populated by JavaScript -->
-                </div>
-            </div>
-            
-            <!-- Quick Actions -->
-            <div class="actions-section">
-                <div class="section-title">
-                    <i class="fas fa-bolt"></i>
-                    Quick Actions
-                </div>
-                <div class="actions-grid">
-                    <a href="/add_patient" class="action-btn">
-                        <i class="fas fa-user-plus"></i>
-                        Add New Patient
-                    </a>
-                    <a href="/patients" class="action-btn">
-                        <i class="fas fa-search"></i>
-                        View All Patients
-                    </a>
-                    <a href="/send-test-reminder" class="action-btn">
-                        <i class="fas fa-bell"></i>
-                        Test System
-                    </a>
-                    <a href="/analytics" class="action-btn">
-                        <i class="fas fa-chart-bar"></i>
-                        View Analytics
-                    </a>
-                </div>
-            </div>
-        </div>
-        
-        <script>
-            // Medical Media Rotation
-            const medicalMedia = {json.dumps(medical_media)};
-            let currentSlide = 0;
-            
-            function initMediaRotator() {{
-                const rotator = document.getElementById('mediaRotator');
-                const controls = document.createElement('div');
-                controls.className = 'media-controls';
-                
-                // Create slides
-                medicalMedia.forEach((media, index) => {{
-                    const slide = document.createElement('div');
-                    slide.className = `media-slide ${{index === 0 ? 'active' : ''}}`;
-                    
-                    if (media.type === 'image') {{
-                        slide.innerHTML = `
-                            <div class="media-content">
-                                <img src="${{media.url}}" alt="${{media.title}}" class="media-image">
-                                <div class="media-title">${{media.title}}</div>
-                                <div class="media-description">${{media.description}}</div>
-                            </div>
-                        `;
-                    }} else {{
-                        slide.innerHTML = `
-                            <div class="media-content">
-                                <div class="media-video-placeholder">
-                                    ${{media.placeholder}}
-                                </div>
-                                <div class="media-title">${{media.title}}</div>
-                                <div class="media-description">${{media.description}}</div>
-                            </div>
-                        `;
-                    }}
-                    
-                    rotator.insertBefore(slide, controls);
-                    
-                    // Create control dot
-                    const dot = document.createElement('div');
-                    dot.className = `media-dot ${{index === 0 ? 'active' : ''}}`;
-                    dot.addEventListener('click', () => showSlide(index));
-                    controls.appendChild(dot);
-                }});
-                
-                rotator.appendChild(controls);
-            }}
-            
-            function showSlide(index) {{
-                const slides = document.querySelectorAll('.media-slide');
-                const dots = document.querySelectorAll('.media-dot');
-                
-                slides.forEach(slide => slide.classList.remove('active'));
-                dots.forEach(dot => dot.classList.remove('active'));
-                
-                slides[index].classList.add('active');
-                dots[index].classList.add('active');
-                currentSlide = index;
-            }}
-            
-            function nextSlide() {{
-                currentSlide = (currentSlide + 1) % medicalMedia.length;
-                showSlide(currentSlide);
-            }}
-            
-            // Auto-rotate every 5 seconds
-            setInterval(nextSlide, 5000);
-            
-            // Initialize when page loads
-            document.addEventListener('DOMContentLoaded', function() {{
-                initMediaRotator();
-                
-                // Add hover effects to stat cards
-                const statCards = document.querySelectorAll('.stat-card');
-                statCards.forEach(card => {{
-                    card.addEventListener('mouseenter', function() {{
-                        this.style.transform = 'translateY(-5px)';
-                    }});
-                    card.addEventListener('mouseleave', function() {{
-                        this.style.transform = 'translateY(0)';
-                    }});
-                }});
-            }});
-        </script>
-    </body>
-    </html>
-    """
+    return render_dashboard_template('dashboard', stats=stats, medical_media=medical_media)
 
 @app.route('/analytics')
 def analytics_dashboard():
     """Advanced analytics page"""
     stats = get_dashboard_stats()
-    
-    # Language distribution
-    language_stats = db.session.query(
-        Patient.language, 
-        func.count(Patient.id)
-    ).group_by(Patient.language).all()
-    
-    # Adherence trends
+    language_stats = db.session.query(Patient.language, func.count(Patient.id)).group_by(Patient.language).all()
     adherence_data = get_adherence_analytics()
     
     return render_dashboard_template('analytics', stats=stats, 
                                    language_stats=language_stats,
                                    adherence_data=adherence_data)
 
+@app.route('/reports')
+def reports_dashboard():
+    """Reports generation page"""
+    stats = get_dashboard_stats()
+    return render_dashboard_template('reports', stats=stats)
+
+@app.route('/settings')
+def settings_dashboard():
+    """System settings page"""
+    stats = get_dashboard_stats()
+    return render_dashboard_template('settings', stats=stats)
+
+@app.route('/support')
+def support_dashboard():
+    """Support and help page"""
+    stats = get_dashboard_stats()
+    return render_dashboard_template('support', stats=stats)
+
 @app.route('/patients')
 def view_patients():
-    """Modern patients listing"""
+    """Patients management page"""
     patients = Patient.query.all()
     stats = get_dashboard_stats()
     return render_dashboard_template('patients', stats=stats, patients=patients)
 
 @app.route('/send-test-reminder')
 def send_test_reminder():
-    """Send a test reminder to verify system works"""
-    # This would typically send to a test number or admin
-    test_message = "🔧 Test reminder from MediRemind SA. System is working correctly!"
-    # send_whatsapp("+27820000000", test_message)  # Uncomment with real number
-    
+    """Test system functionality"""
     stats = get_dashboard_stats()
     return render_dashboard_template('test_reminder', stats=stats, 
                                    message="Test reminder functionality ready!")
 
-# === EXISTING FUNCTIONALITY ===
-
 @app.route('/add_patient', methods=['GET', 'POST'])
 def add_patient():
+    """Add new patient page"""
     if request.method == 'POST':
         patient = Patient(
             phone=request.form['phone'],
@@ -718,7 +195,7 @@ def add_patient():
         db.session.add(med)
         db.session.commit()
         
-        welcome_msg = MESSAGES[patient.language]['confirmation'].format(medication=med.name)
+        welcome_msg = MESSAGES[patient.language]['confirmation']
         send_whatsapp(patient.phone, welcome_msg)
         
         return "Patient added successfully!"
@@ -726,11 +203,15 @@ def add_patient():
     stats = get_dashboard_stats()
     return render_dashboard_template('add_patient', stats=stats)
 
+# === WHATSAPP WEBHOOK ===
+
 @app.route('/whatsapp', methods=['POST'])
 def whatsapp_webhook():
     try:
         incoming_msg = request.form.get('Body', '').strip()
         from_number = request.form.get('From', '').replace('whatsapp:', '')
+        
+        print(f"Message from {from_number}: {incoming_msg}")
         
         response = handle_conversation(from_number, incoming_msg)
         send_whatsapp(from_number, response)
@@ -772,7 +253,6 @@ def get_dashboard_stats():
 
 def get_adherence_analytics():
     """Get adherence analytics data"""
-    # Last 7 days adherence rates
     adherence_data = []
     for i in range(7):
         date = datetime.today().date() - timedelta(days=i)
@@ -785,7 +265,7 @@ def get_adherence_analytics():
         ).count()
         rate = (day_taken / day_reminders * 100) if day_reminders > 0 else 0
         adherence_data.append({
-            'date': date,
+            'date': date.strftime('%b %d'),
             'rate': rate,
             'reminders': day_reminders,
             'taken': day_taken
@@ -794,13 +274,16 @@ def get_adherence_analytics():
 
 def render_dashboard_template(page, **kwargs):
     """Render modern dashboard templates"""
-    base_template = """
+    stats = kwargs.get('stats', {})
+    medical_media = kwargs.get('medical_media', [])
+    
+    base_html = f"""
     <!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>MediRemind SA - {page_title}</title>
+        <title>MediRemind SA - {page.title()}</title>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         <style>
@@ -848,190 +331,251 @@ def render_dashboard_template(page, **kwargs):
                 display: flex;
                 align-items: center;
                 gap: 15px;
+                text-decoration: none;
+                color: inherit;
             }}
             
+            .logo:hover {{ text-decoration: none; color: inherit; }}
+            
             .logo-icon {{
-                width: 50px;
-                height: 50px;
-                background: var(--ai-gradient);
-                border-radius: 12px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: white;
-                font-size: 24px;
-                font-weight: bold;
+                width: 50px; height: 50px; background: var(--ai-gradient); border-radius: 12px;
+                display: flex; align-items: center; justify-content: center; color: white;
+                font-size: 24px; font-weight: bold;
             }}
             
             .logo-text h1 {{
-                font-size: 28px;
-                font-weight: 700;
-                background: var(--ai-gradient);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
+                font-size: 28px; font-weight: 700; background: var(--ai-gradient);
+                -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
             }}
             
-            .nav-buttons {{
-                display: flex;
-                gap: 10px;
+            .logo-text p {{ font-size: 14px; color: #6b7280; font-weight: 500; }}
+            
+            .nav-tabs {{
+                display: flex; gap: 5px; background: rgba(255, 255, 255, 0.1);
+                padding: 5px; border-radius: 12px; backdrop-filter: blur(10px);
             }}
             
-            .nav-btn {{
-                background: rgba(99, 102, 241, 0.1);
-                border: 2px solid rgba(99, 102, 241, 0.2);
-                color: var(--ai-primary);
-                padding: 10px 20px;
-                border-radius: 10px;
-                text-decoration: none;
-                font-weight: 500;
-                transition: all 0.3s ease;
+            .nav-tab {{
+                padding: 10px 20px; border-radius: 8px; text-decoration: none; color: #6b7280;
+                font-weight: 500; transition: all 0.3s ease; background: transparent;
             }}
             
-            .nav-btn:hover {{
-                background: var(--ai-primary);
-                color: white;
-                transform: translateY(-2px);
+            .nav-tab.active, .nav-tab:hover {{
+                background: rgba(255, 255, 255, 0.9); color: var(--ai-primary);
             }}
             
             .content-card {{
-                background: rgba(255, 255, 255, 0.95);
-                backdrop-filter: blur(10px);
-                border-radius: 20px;
-                padding: 30px;
+                background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
+                border-radius: 20px; padding: 30px; margin-bottom: 20px;
                 box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
                 border: 1px solid rgba(255, 255, 255, 0.2);
-                margin-bottom: 20px;
             }}
             
             .stats-grid {{
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 20px;
-                margin-bottom: 30px;
+                display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 20px; margin-bottom: 30px;
             }}
             
             .stat-card {{
-                background: rgba(255, 255, 255, 0.9);
-                border-radius: 16px;
-                padding: 20px;
-                text-align: center;
-                border: 1px solid rgba(255, 255, 255, 0.3);
+                background: rgba(255, 255, 255, 0.9); border-radius: 16px; padding: 20px;
+                text-align: center; border: 1px solid rgba(255, 255, 255, 0.3);
+                transition: transform 0.3s ease;
             }}
             
+            .stat-card:hover {{ transform: translateY(-5px); }}
+            
             .stat-number {{
-                font-size: 32px;
-                font-weight: 700;
-                background: var(--ai-gradient);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
+                font-size: 32px; font-weight: 700; background: var(--ai-gradient);
+                -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             }}
+            
+            /* Media Rotator Styles */
+            .media-rotator {{
+                position: relative; height: 300px; border-radius: 15px; overflow: hidden;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin: 20px 0;
+            }}
+            
+            .media-slide {{
+                position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+                opacity: 0; transition: opacity 1s ease-in-out;
+                display: flex; align-items: center; justify-content: center; padding: 40px;
+            }}
+            
+            .media-slide.active {{ opacity: 1; }}
+            
+            .media-content {{ text-align: center; color: white; }}
+            
+            .media-image {{ max-width: 100%; max-height: 200px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }}
+            
+            .media-title {{ font-size: 24px; font-weight: 600; margin: 15px 0 10px 0; }}
+            
+            .media-description {{ font-size: 16px; opacity: 0.9; }}
+            
+            .media-controls {{ display: flex; justify-content: center; gap: 10px; margin-top: 20px; }}
+            
+            .media-dot {{ width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,0.3); cursor: pointer; transition: all 0.3s ease; }}
+            
+            .media-dot.active {{ background: white; transform: scale(1.2); }}
+            
+            .actions-grid {{
+                display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 15px; margin-top: 20px;
+            }}
+            
+            .action-btn {{
+                background: var(--ai-gradient); color: white; padding: 15px 20px;
+                border-radius: 12px; text-decoration: none; text-align: center;
+                transition: all 0.3s ease; display: block;
+            }}
+            
+            .action-btn:hover {{ transform: translateY(-2px); box-shadow: 0 10px 25px rgba(99,102,241,0.3); color: white; }}
         </style>
     </head>
     <body>
         <div class="dashboard-container">
             <div class="header">
-                <div class="logo">
+                <a href="/" class="logo">
                     <div class="logo-icon">💊</div>
                     <div class="logo-text">
                         <h1>MediRemind SA</h1>
                         <small>AI-Powered Medication Adherence</small>
                     </div>
-                </div>
-                <div class="nav-buttons">
-                    <a href="/" class="nav-btn">Dashboard</a>
-                    <a href="/patients" class="nav-btn">Patients</a>
-                    <a href="/analytics" class="nav-btn">Analytics</a>
-                    <a href="/add_patient" class="nav-btn">Add Patient</a>
+                </a>
+                <div class="nav-tabs">
+                    <a href="/analytics" class="nav-tab {'active' if page == 'analytics' else ''}">📊 Analytics</a>
+                    <a href="/reports" class="nav-tab {'active' if page == 'reports' else ''}">📋 Reports</a>
+                    <a href="/settings" class="nav-tab {'active' if page == 'settings' else ''}">⚙️ Settings</a>
+                    <a href="/support" class="nav-tab {'active' if page == 'support' else ''}">🛟 Support</a>
                 </div>
             </div>
-            {content}
+            {get_page_content(page, stats, **kwargs)}
         </div>
+        <script>{get_page_script(page, medical_media)}</script>
     </body>
     </html>
     """
     
-    stats = kwargs.get('stats', {})
-    
+    return base_html
+
+def get_page_content(page, stats, **kwargs):
+    """Get content for each page"""
     if page == 'dashboard':
-        content = f"""
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-number">{stats['patients']}</div>
-                <div>Total Patients</div>
+        medical_media = kwargs.get('medical_media', [])
+        media_html = ""
+        if medical_media:
+            media_html = f"""
+            <div class="content-card">
+                <h2><i class="fas fa-images"></i> Healthcare Excellence</h2>
+                <div class="media-rotator" id="mediaRotator"></div>
             </div>
-            <div class="stat-card">
-                <div class="stat-number">{stats['active_meds']}</div>
-                <div>Active Medications</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">{stats['reminders_today']}</div>
-                <div>Reminders Today</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">{stats['adherence_rate']:.1f}%</div>
-                <div>Adherence Rate</div>
-            </div>
-        </div>
+            """
         
+        return f"""
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-number">{stats['patients']}</div><div>Total Patients</div></div>
+            <div class="stat-card"><div class="stat-number">{stats['active_meds']}</div><div>Active Medications</div></div>
+            <div class="stat-card"><div class="stat-number">{stats['reminders_today']}</div><div>Reminders Today</div></div>
+            <div class="stat-card"><div class="stat-number">{stats['adherence_rate']:.1f}%</div><div>Adherence Rate</div></div>
+        </div>
+        {media_html}
         <div class="content-card">
-            <h2>Quick Actions</h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px;">
-                <a href="/add_patient" class="nav-btn" style="text-align: center;">
-                    <i class="fas fa-user-plus"></i> Add Patient
-                </a>
-                <a href="/patients" class="nav-btn" style="text-align: center;">
-                    <i class="fas fa-list"></i> View Patients
-                </a>
-                <a href="/analytics" class="nav-btn" style="text-align: center;">
-                    <i class="fas fa-chart-bar"></i> Analytics
-                </a>
-                <a href="/send-test-reminder" class="nav-btn" style="text-align: center;">
-                    <i class="fas fa-bell"></i> Test System
-                </a>
+            <h2><i class="fas fa-bolt"></i> Quick Actions</h2>
+            <div class="actions-grid">
+                <a href="/add_patient" class="action-btn"><i class="fas fa-user-plus"></i> Add Patient</a>
+                <a href="/patients" class="action-btn"><i class="fas fa-list"></i> View Patients</a>
+                <a href="/send-test-reminder" class="action-btn"><i class="fas fa-bell"></i> Test System</a>
+                <a href="/analytics" class="action-btn"><i class="fas fa-chart-bar"></i> View Analytics</a>
             </div>
         </div>
         """
-        
+    
     elif page == 'analytics':
         language_stats = kwargs.get('language_stats', [])
         adherence_data = kwargs.get('adherence_data', [])
         
-        lang_chart = "".join([f"<div>{lang[0]}: {lang[1]} patients</div>" for lang in language_stats])
-        adherence_chart = "".join([f"<div>{item['date']}: {item['rate']:.1f}%</div>" for item in adherence_data[:3]])
+        lang_html = "".join([f"<div style='padding: 10px; border-bottom: 1px solid #eee;'>{lang[0]}: <strong>{lang[1]}</strong> patients</div>" for lang in language_stats])
+        adherence_html = "".join([f"<div style='padding: 10px; border-bottom: 1px solid #eee;'>{item['date']}: <strong>{item['rate']:.1f}%</strong> ({item['taken']}/{item['reminders']})</div>" for item in adherence_data])
         
-        content = f"""
+        return f"""
         <div class="content-card">
             <h2>📊 Analytics Dashboard</h2>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px;">
                 <div>
                     <h3>Language Distribution</h3>
-                    {lang_chart}
+                    {lang_html}
                 </div>
                 <div>
-                    <h3>Adherence Trends (Last 3 Days)</h3>
-                    {adherence_chart}
+                    <h3>Adherence Trends</h3>
+                    {adherence_html}
                 </div>
             </div>
         </div>
         """
-        
+    
+    elif page == 'reports':
+        return """
+        <div class="content-card">
+            <h2>📋 Reports Generator</h2>
+            <p>Generate detailed reports for your clinic:</p>
+            <div class="actions-grid">
+                <a href="#" class="action-btn"><i class="fas fa-file-medical"></i> Patient Adherence Report</a>
+                <a href="#" class="action-btn"><i class="fas fa-chart-bar"></i> Monthly Analytics</a>
+                <a href="#" class="action-btn"><i class="fas fa-language"></i> Language Usage Report</a>
+                <a href="#" class="action-btn"><i class="fas fa-download"></i> Export All Data</a>
+            </div>
+        </div>
+        """
+    
+    elif page == 'settings':
+        return """
+        <div class="content-card">
+            <h2>⚙️ System Settings</h2>
+            <p>Configure your MediRemind SA system:</p>
+            <div style="display: grid; gap: 15px; max-width: 500px;">
+                <div style="padding: 15px; background: #f8fafc; border-radius: 10px;">
+                    <strong>WhatsApp Settings</strong><br>
+                    <small>Configure your Twilio integration</small>
+                </div>
+                <div style="padding: 15px; background: #f8fafc; border-radius: 10px;">
+                    <strong>Clinic Information</strong><br>
+                    <small>Update your clinic details</small>
+                </div>
+                <div style="padding: 15px; background: #f8fafc; border-radius: 10px;">
+                    <strong>Reminder Schedule</strong><br>
+                    <small>Set default reminder times</small>
+                </div>
+            </div>
+        </div>
+        """
+    
+    elif page == 'support':
+        return """
+        <div class="content-card">
+            <h2>🛟 Support & Help</h2>
+            <p>Get help with MediRemind SA:</p>
+            <div class="actions-grid">
+                <a href="#" class="action-btn"><i class="fas fa-book"></i> User Guide</a>
+                <a href="#" class="action-btn"><i class="fas fa-video"></i> Video Tutorials</a>
+                <a href="#" class="action-btn"><i class="fas fa-envelope"></i> Contact Support</a>
+                <a href="#" class="action-btn"><i class="fas fa-bug"></i> Report Issue</a>
+            </div>
+        </div>
+        """
+    
     elif page == 'patients':
         patients = kwargs.get('patients', [])
-        patients_list = "".join([f"<div style='padding: 15px; border-bottom: 1px solid #eee;'>{p.name} ({p.phone}) - {p.language}</div>" for p in patients])
-        
-        content = f"""
+        patients_html = "".join([f"<div style='padding: 15px; border-bottom: 1px solid #eee;'><strong>{p.name}</strong> ({p.phone}) - {p.language}</div>" for p in patients]) if patients else "<p>No patients yet.</p>"
+        return f"""
         <div class="content-card">
             <h2>👥 Patients Management</h2>
             <div style="margin-top: 20px;">
-                {patients_list if patients else "<p>No patients yet. <a href='/add_patient'>Add your first patient</a></p>"}
+                {patients_html}
             </div>
         </div>
         """
-        
+    
     elif page == 'add_patient':
-        content = """
+        return """
         <div class="content-card">
             <h2>👤 Add New Patient</h2>
             <form method="POST" style="margin-top: 20px; display: grid; gap: 15px; max-width: 400px;">
@@ -1048,37 +592,82 @@ def render_dashboard_template(page, **kwargs):
             </form>
         </div>
         """
-        
+    
     elif page == 'test_reminder':
         message = kwargs.get('message', 'Test completed')
-        content = f"""
+        return f"""
         <div class="content-card">
             <h2>🔧 System Test</h2>
             <p style="margin-top: 20px; padding: 20px; background: #10b98120; border-radius: 10px; border-left: 4px solid #10b981;">
                 {message}
             </p>
-            <p style="margin-top: 15px;">This feature allows you to test the WhatsApp integration without affecting real patients.</p>
         </div>
         """
-    
-    return base_template.format(page_title=page.title(), content=content)
 
-# === EXISTING CONVERSATION FUNCTIONS ===
+def get_page_script(page, medical_media):
+    """Get JavaScript for each page"""
+    if page == 'dashboard' and medical_media:
+        return f"""
+        document.addEventListener('DOMContentLoaded', function() {{
+            const media = {json.dumps(medical_media)};
+            const rotator = document.getElementById('mediaRotator');
+            let currentSlide = 0;
+            
+            // Create slides and controls
+            media.forEach((item, index) => {{
+                const slide = document.createElement('div');
+                slide.className = 'media-slide';
+                slide.innerHTML = `
+                    <div class="media-content">
+                        <img src="${{item.url}}" alt="${{item.title}}" class="media-image">
+                        <div class="media-title">${{item.title}}</div>
+                        <div class="media-description">${{item.description}}</div>
+                    </div>
+                `;
+                rotator.appendChild(slide);
+            }});
+            
+            const controls = document.createElement('div');
+            controls.className = 'media-controls';
+            media.forEach((_, index) => {{
+                const dot = document.createElement('div');
+                dot.className = 'media-dot';
+                dot.onclick = () => showSlide(index);
+                controls.appendChild(dot);
+            }});
+            rotator.appendChild(controls);
+            
+            function showSlide(index) {{
+                document.querySelectorAll('.media-slide').forEach(slide => slide.classList.remove('active'));
+                document.querySelectorAll('.media-dot').forEach(dot => dot.classList.remove('active'));
+                document.querySelectorAll('.media-slide')[index].classList.add('active');
+                document.querySelectorAll('.media-dot')[index].classList.add('active');
+                currentSlide = index;
+            }}
+            
+            function nextSlide() {{
+                currentSlide = (currentSlide + 1) % media.length;
+                showSlide(currentSlide);
+            }}
+            
+            // Start rotation
+            showSlide(0);
+            setInterval(nextSlide, 5000);
+        }});
+        """
+    return ""
+
+# === EXISTING FUNCTIONS ===
 
 def handle_conversation(patient_phone, message):
     """Handle patient conversations"""
     patient = Patient.query.filter_by(phone=patient_phone).first()
-    
     if not patient:
         patient = Patient(phone=patient_phone, conversation_state='language_selection')
         db.session.add(patient)
         db.session.commit()
         return MESSAGES['english']['welcome']
-    
-    # ... rest of conversation logic (simplified for example)
     return MESSAGES[patient.language]['help']
-
-# === BACKGROUND WORKER ===
 
 def reminder_worker():
     """Send medication reminders"""
@@ -1086,29 +675,21 @@ def reminder_worker():
         try:
             current_time = datetime.now().strftime('%H:%M')
             due_meds = Medication.query.filter_by(active=True).all()
-            
             for med in due_meds:
                 if med.times and current_time in med.times:
                     patient = Patient.query.filter_by(phone=med.patient_phone).first()
                     if patient:
-                        message = MESSAGES[patient.language]['reminder'].format(
-                            medication=med.name, dosage=med.dosage
-                        )
+                        message = MESSAGES[patient.language]['reminder'].format(medication=med.name, dosage=med.dosage)
                         send_whatsapp(patient.phone, message)
-                        # Log reminder...
-            
             time.sleep(60)
         except Exception as e:
             print(f"Reminder error: {e}")
             time.sleep(60)
 
-# === INITIALIZATION ===
-
 def init_app():
     with app.app_context():
         db.create_all()
         print("Database initialized!")
-        # Start background worker
         worker_thread = threading.Thread(target=reminder_worker, daemon=True)
         worker_thread.start()
         print("Reminder worker started!")
