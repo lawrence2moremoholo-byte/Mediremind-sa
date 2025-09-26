@@ -11,10 +11,10 @@ services:
           name: mediremind_db
           property: connectionString
       - key: TWILIO_SID
-        value: your_twilio_account_sid
+        value: AC5f56b4558f7b4002ac28ac6f7e9126c3
       - key: TWILIO_TOKEN
-        value: your_twilio_auth_token
+        value: 971dcd0ce0ebec1061f94ed29785ed96
       - key: TWILIO_WHATSAPP
-        value: your_twilio_whatsapp_number
+        value: +14155238886
       - key: SECRET_KEY
-        value: your-secret-key-here
+        value: typical-usual
